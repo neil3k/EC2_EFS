@@ -88,7 +88,7 @@ resource "aws_efs_file_system" "efs" {
   creation_token = "my-efs"
 
   tags = {
-    Name = "MyProduct"
+    Name = "EFS File System"
   }
 }
 
@@ -101,8 +101,8 @@ resource "aws_efs_mount_target" "mount" {
 resource "null_resource" "configure_nfs" {
   depends_on = [aws_efs_mount_target.mount]
   connection {
-    type        = "ssh"
-    user        = "ec2-user"
+    type        = var.connection_type
+    user        = var.username
     private_key = tls_private_key.my_key.private_key_pem
     host        = aws_instance.web.public_ip
   }
@@ -110,6 +110,7 @@ resource "null_resource" "configure_nfs" {
     inline = [
       "mkdir efs",
       "sudo yum -y install amazon-efs-utils",
+      "sleep 10",
       "sudo mount -t efs ${aws_efs_file_system.efs.id} efs/ "
     ]
   }
