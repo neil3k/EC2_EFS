@@ -9,12 +9,10 @@ data "aws_vpc" "main" {
   }
 }
 
-data "aws_subnet" "this" {
-  vpc_id = data.aws_vpc.main.id
-
-  tags = {
-    Tier = "Public"
-    Name = "Main Subnet"
+data "aws_subnets" "subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.main.id]
   }
 }
 
@@ -67,23 +65,7 @@ resource "aws_security_group" "ec2_security_group" {
   }
 }
 
-
-# EC2 instance 
-resource "aws_instance" "web" {
-  ami                         = "ami-0648ea225c13e0729"
-  subnet_id                   = data.aws_subnet.this.id
-  instance_type               = "t2.micro"
-  key_name                    = aws_key_pair.deployer.key_name
-  security_groups             = [aws_security_group.ec2_security_group.id]
-  associate_public_ip_address = true
-  tags = {
-    Name = "WEB"
-
-  }
-  depends_on = [aws_security_group.ec2_security_group]
-}
-
-# Creating EFS file system
+#Creating EFS file system
 resource "aws_efs_file_system" "efs" {
   creation_token = "my-efs"
 
@@ -94,24 +76,32 @@ resource "aws_efs_file_system" "efs" {
 
 resource "aws_efs_mount_target" "mount" {
   file_system_id  = aws_efs_file_system.efs.id
-  subnet_id       = aws_instance.web.subnet_id
+  subnet_id       = data.aws_subnets.subnets.ids[0]
   security_groups = [aws_security_group.ec2_security_group.id]
+  depends_on      = [aws_efs_file_system.efs]
 }
 
-resource "null_resource" "configure_nfs" {
-  depends_on = [aws_efs_mount_target.mount]
-  connection {
-    type        = var.connection_type
-    user        = var.username
-    private_key = tls_private_key.my_key.private_key_pem
-    host        = aws_instance.web.public_ip
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir efs",
-      "sudo yum -y install amazon-efs-utils",
-      "sleep 10",
-      "sudo mount -t efs ${aws_efs_file_system.efs.id} efs/ "
-    ]
-  }
+resource "aws_launch_configuration" "talend" {
+  name                        = "talend"
+  instance_type               = "t3.micro"
+  associate_public_ip_address = true
+  user_data                   = <<EOF
+#!/bin/bash
+sudo mkdir efs
+sudo yum -y install amazon-efs-utils
+mount -t efs ${aws_efs_file_system.efs.id} efs/
+EOF
+  security_groups             = [aws_security_group.ec2_security_group.id]
+  key_name                    = aws_key_pair.deployer.key_name
+  image_id                    = "ami-0648ea225c13e0729"
+  depends_on                  = [aws_efs_mount_target.mount]
+}
+
+resource "aws_autoscaling_group" "talend" {
+  name                 = "talend"
+  launch_configuration = aws_launch_configuration.talend.id
+  max_size             = 4
+  min_size             = 2
+  vpc_zone_identifier  = [data.aws_subnets.subnets.ids[0]]
+  depends_on           = [aws_efs_mount_target.mount]
 }
