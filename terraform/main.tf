@@ -26,6 +26,7 @@ module "security" {
   vpc_id = data.aws_vpc.main.id
 }
 
+#Create EFS resources
 module "efs" {
   source     = "../terraform/modules/efs"
   subnet_id  = data.aws_subnets.subnets.ids[0]
