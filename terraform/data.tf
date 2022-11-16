@@ -8,14 +8,3 @@ data "aws_vpc" "main" {
     values = ["Main VPC"]
   }
 }
-
-data "aws_subnets" "subnets" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.main.id]
-  }
-
-  tags = {
-    Tier = "Public"
-  }
-}

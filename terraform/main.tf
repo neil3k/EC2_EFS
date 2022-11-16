@@ -1,15 +1,3 @@
-#Create dynamodb table for locking
-resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "terraform-up-and-running-locks"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-}
-
 #Create compute infrastructure
 module "compute" {
   source = "../terraform/modules/compute"
@@ -28,6 +16,5 @@ module "security" {
 #Create EFS resources
 module "efs" {
   source     = "../terraform/modules/efs"
-  subnet_id  = data.aws_subnets.subnets.ids
   sec_grp_id = module.security.security_group_id
 }

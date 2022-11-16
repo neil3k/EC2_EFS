@@ -7,7 +7,8 @@ resource "aws_launch_configuration" "talend" {
 #!/bin/bash
 sudo mkdir efs
 sudo yum -y install amazon-efs-utils
-mount -t efs ${var.efs_id} efs/
+sudo pip3 install botocore --upgrade
+sudo mount -t efs -o tls ${var.efs_id}:/ efs
 EOF
   security_groups             = [var.security_group_name]
   key_name                    = var.ec2_key_name
@@ -15,10 +16,9 @@ EOF
 }
 
 resource "aws_autoscaling_group" "talend" {
-  for_each             = toset(data.aws_subnets.subnets.ids)
   name                 = "talend"
   launch_configuration = aws_launch_configuration.talend.id
   max_size             = 4
   min_size             = 2
-  vpc_zone_identifier  = each.value
+  vpc_zone_identifier  = data.aws_subnets.subnets.ids
 }
