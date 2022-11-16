@@ -13,4 +13,8 @@ variable "efs_dns" {}
 variable "instance_type" {
   default = "t3.micro"
 }
+variable "public_ip" {
+  type = bool
+  default = true
+}
 

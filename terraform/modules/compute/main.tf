@@ -2,7 +2,7 @@
 resource "aws_launch_configuration" "talend" {
   name                        = "talend-${var.instance_type}"
   instance_type               = var.instance_type
-  associate_public_ip_address = true
+  associate_public_ip_address = var.public_ip
   user_data                   = <<EOF
 #!/bin/bash
 sudo mkdir efs
