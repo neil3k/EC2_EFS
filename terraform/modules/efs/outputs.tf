@@ -9,3 +9,7 @@ output "mount_target_ids" {
 output "efs_file_system_arn" {
   value = aws_efs_file_system.efs.arn
 }
+
+output "efs_file_system_dns" {
+  value = aws_efs_file_system.efs.dns_name
+}
