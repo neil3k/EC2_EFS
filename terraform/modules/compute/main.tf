@@ -17,6 +17,15 @@ resource "aws_launch_template" "talend" {
     associate_public_ip_address = true
     security_groups = [var.security_group_name]
   }
+  
+  tag_specifications {
+    resource_type = "instance"
+    
+    tags = {
+      name = "talend"
+      env  = "dev"
+    }
+  }
 }
 
 resource "aws_autoscaling_group""talend" {
