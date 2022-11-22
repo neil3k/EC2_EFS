@@ -17,3 +17,10 @@ module "ebs" {
   source     = "../terraform/modules/ebs"
   sec_grp_id = module.security.security_group_id
 }
+
+# Create RDS functionality
+module "rds" {
+  source     = "../terraform/modules/rds"
+  db_subnet  = data.aws_subnets.subnets.ids
+  security_group = module.security.security_group_id
+}

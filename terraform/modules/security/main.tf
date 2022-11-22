@@ -24,9 +24,9 @@ resource "aws_security_group" "ec2_security_group" {
   }
 
   ingress {
-    description = "EFS mount target"
-    from_port   = 2049
-    to_port     = 2049
+    description = "mysql"
+    from_port   = 3306
+    to_port     = 3306
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
