@@ -3,6 +3,11 @@ resource "tls_private_key" "my_key" {
   algorithm = "RSA"
 }
 
+resource "aws_kms_key" "a" {
+  description             = "Talend KMS Key"
+  deletion_window_in_days = 10
+}
+
 # Generate a key-pair with above key
 resource "aws_key_pair" "deployer" {
   key_name   = "efs-key"

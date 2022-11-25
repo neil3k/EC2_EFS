@@ -19,4 +19,5 @@ variable "public_ip" {
   type = bool
   default = true
 }
+variable "kms_key_arn" {}
 

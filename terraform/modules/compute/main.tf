@@ -10,11 +10,13 @@ resource "aws_launch_template" "talend" {
     
     ebs {
       volume_size = 20
+      encrypted = "true"
+      kms_key_id = var.kms_key_arn
     }
   }
   
   network_interfaces {
-    associate_public_ip_address = true
+    associate_public_ip_address = false
     security_groups = [var.security_group_name]
   }
   

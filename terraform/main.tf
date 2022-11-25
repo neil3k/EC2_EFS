@@ -4,6 +4,7 @@ module "compute" {
 
   security_group_name = module.security.security_group_id
   ec2_key_name        = module.security.key_name
+  KMS_key_arn         = module.security.KMS_Key_Arn
 }
 
 #Call security module to create keys and security groups
